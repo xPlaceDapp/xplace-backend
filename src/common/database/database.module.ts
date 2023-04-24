@@ -1,7 +1,8 @@
-import { Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { ApiConfigModule } from "../api-config/api.config.module";
-import { ApiConfigService } from "../api-config/api.config.service";
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ApiConfigModule } from '../api-config/api.config.module'
+import { ApiConfigService } from '../api-config/api.config.service'
+import { PixelEntity } from '../../endpoints/pixels/entity/pixel.entity'
 
 @Module({
   imports: [
@@ -10,16 +11,22 @@ import { ApiConfigService } from "../api-config/api.config.service";
       useFactory: (apiConfigService: ApiConfigService) => ({
         type: 'mysql',
         ...apiConfigService.getDatabaseConnection(),
-        entities: [],
+        entities: [
+          PixelEntity
+        ],
         keepConnectionAlive: true,
-        synchronize: true,
+        synchronize: true
       }),
-      inject: [ApiConfigService],
+      inject: [ApiConfigService]
     }),
-    TypeOrmModule.forFeature([]),
+    TypeOrmModule.forFeature([
+      PixelEntity
+    ])
   ],
   exports: [
-    TypeOrmModule.forFeature([]),
-  ],
+    TypeOrmModule.forFeature([
+      PixelEntity
+    ])
+  ]
 })
 export class DatabaseModule { }

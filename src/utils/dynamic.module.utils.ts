@@ -1,9 +1,9 @@
-import { ElasticModule, ElasticModuleOptions, CachingModule, CachingModuleOptions, ApiModule, ApiModuleOptions, ERDNEST_CONFIG_SERVICE } from "@multiversx/sdk-nestjs";
-import { DynamicModule, Provider } from "@nestjs/common";
-import { ClientOptions, ClientProxyFactory, Transport } from "@nestjs/microservices";
-import { ApiConfigModule } from "src/common/api-config/api.config.module";
-import { ApiConfigService } from "src/common/api-config/api.config.service";
-import { SdkNestjsConfigServiceImpl } from "src/common/api-config/sdk.nestjs.config.service.impl";
+import { ElasticModule, ElasticModuleOptions, CachingModule, CachingModuleOptions, ApiModule, ApiModuleOptions, ERDNEST_CONFIG_SERVICE } from '@multiversx/sdk-nestjs'
+import { type DynamicModule, type Provider } from '@nestjs/common'
+import { type ClientOptions, ClientProxyFactory, Transport } from '@nestjs/microservices'
+import { ApiConfigModule } from 'src/common/api-config/api.config.module'
+import { ApiConfigService } from 'src/common/api-config/api.config.service'
+import { SdkNestjsConfigServiceImpl } from 'src/common/api-config/sdk.nestjs.config.service.impl'
 
 export class DynamicModuleUtils {
   static getElasticModule(): DynamicModule {
@@ -11,10 +11,10 @@ export class DynamicModuleUtils {
       imports: [ApiConfigModule],
       useFactory: (apiConfigService: ApiConfigService) => new ElasticModuleOptions({
         url: apiConfigService.getElasticUrl(),
-        customValuePrefix: 'api',
+        customValuePrefix: 'api'
       }),
-      inject: [ApiConfigService],
-    });
+      inject: [ApiConfigService]
+    })
   }
 
   static getCachingModule(): DynamicModule {
@@ -23,10 +23,10 @@ export class DynamicModuleUtils {
       useFactory: (apiConfigService: ApiConfigService) => new CachingModuleOptions({
         url: apiConfigService.getRedisUrl(),
         poolLimit: apiConfigService.getPoolLimit(),
-        processTtl: apiConfigService.getProcessTtl(),
+        processTtl: apiConfigService.getProcessTtl()
       }),
-      inject: [ApiConfigService],
-    });
+      inject: [ApiConfigService]
+    })
   }
 
   static getApiModule(): DynamicModule {
@@ -36,17 +36,17 @@ export class DynamicModuleUtils {
         axiosTimeout: apiConfigService.getAxiosTimeout(),
         rateLimiterSecret: apiConfigService.getRateLimiterSecret(),
         serverTimeout: apiConfigService.getServerTimeout(),
-        useKeepAliveAgent: apiConfigService.getUseKeepAliveAgentFlag(),
+        useKeepAliveAgent: apiConfigService.getUseKeepAliveAgentFlag()
       }),
-      inject: [ApiConfigService],
-    });
+      inject: [ApiConfigService]
+    })
   }
 
   static getNestJsApiConfigService(): Provider {
     return {
       provide: ERDNEST_CONFIG_SERVICE,
-      useClass: SdkNestjsConfigServiceImpl,
-    };
+      useClass: SdkNestjsConfigServiceImpl
+    }
   }
 
   static getPubSubService(): Provider {
@@ -60,13 +60,13 @@ export class DynamicModuleUtils {
             port: 6379,
             retryDelay: 1000,
             retryAttempts: 10,
-            retryStrategy: () => 1000,
-          },
-        };
+            retryStrategy: () => 1000
+          }
+        }
 
-        return ClientProxyFactory.create(clientOptions);
+        return ClientProxyFactory.create(clientOptions)
       },
-      inject: [ApiConfigService],
-    };
+      inject: [ApiConfigService]
+    }
   }
 }

@@ -1,56 +1,56 @@
-import { NetworkConfig } from "@multiversx/sdk-network-providers";
-import { INetworkProvider } from "@multiversx/sdk-network-providers/out/interface";
-import { Interaction, IAddress, Transaction } from "@multiversx/sdk-core";
-import { Logger } from "@nestjs/common";
+import { type NetworkConfig } from '@multiversx/sdk-network-providers'
+import { type INetworkProvider } from '@multiversx/sdk-network-providers/out/interface'
+import { type Interaction, type IAddress, type Transaction } from '@multiversx/sdk-core'
+import { Logger } from '@nestjs/common'
 
 export class ContractTransactionGenerator {
-  private readonly logger: Logger;
-  private readonly proxy: INetworkProvider;
-  private networkConfig: NetworkConfig | undefined = undefined;
+  private readonly logger: Logger
+  private readonly proxy: INetworkProvider
+  private networkConfig: NetworkConfig | undefined = undefined
 
   constructor(proxy: INetworkProvider) {
-    this.logger = new Logger(ContractTransactionGenerator.name);
+    this.logger = new Logger(ContractTransactionGenerator.name)
 
-    this.proxy = proxy;
+    this.proxy = proxy
   }
 
   private async loadNetworkConfig(): Promise<NetworkConfig> {
     try {
-      const networkConfig: NetworkConfig = await this.proxy.getNetworkConfig();
+      const networkConfig: NetworkConfig = await this.proxy.getNetworkConfig()
 
-      return networkConfig;
+      return networkConfig
     } catch (error) {
-      this.logger.log(`Unexpected error when trying to load network config`);
-      this.logger.error(error);
+      this.logger.log('Unexpected error when trying to load network config')
+      this.logger.error(error)
 
-      throw new Error('Error when loading network config');
+      throw new Error('Error when loading network config')
     }
   }
 
   private async getNetworkConfig(): Promise<NetworkConfig> {
-    if (!this.networkConfig) {
-      this.networkConfig = await this.loadNetworkConfig();
+    if (this.networkConfig == null) {
+      this.networkConfig = await this.loadNetworkConfig()
     }
 
-    return this.networkConfig;
+    return this.networkConfig
   }
 
   async createTransaction(interaction: Interaction, signerAddress: IAddress): Promise<Transaction> {
     try {
-      const transaction: Transaction = interaction.buildTransaction();
+      const transaction: Transaction = interaction.buildTransaction()
 
-      const signerAccount = await this.proxy.getAccount(signerAddress);
-      transaction.setNonce(signerAccount.nonce.valueOf());
+      const signerAccount = await this.proxy.getAccount(signerAddress)
+      transaction.setNonce(signerAccount.nonce.valueOf())
 
-      const networkConfig: NetworkConfig = await this.getNetworkConfig();
-      transaction.setChainID(networkConfig.ChainID);
+      const networkConfig: NetworkConfig = await this.getNetworkConfig()
+      transaction.setChainID(networkConfig.ChainID)
 
-      return transaction;
+      return transaction
     } catch (error) {
-      this.logger.log(`Unexpected error when trying to create transaction '${interaction.getFunction().valueOf()}' to contract '${interaction.getContractAddress().bech32()}'`);
-      this.logger.error(error);
+      this.logger.log(`Unexpected error when trying to create transaction '${interaction.getFunction().valueOf()}' to contract '${interaction.getContractAddress().bech32()}'`)
+      this.logger.error(error)
 
-      throw error;
+      throw error
     }
   }
 }

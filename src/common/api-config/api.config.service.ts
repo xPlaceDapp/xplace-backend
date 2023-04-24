@@ -1,81 +1,80 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class ApiConfigService {
   constructor(private readonly configService: ConfigService) { }
 
   getApiUrl(): string {
-    const apiUrl = this.configService.get<string>('urls.api');
-    if (!apiUrl) {
-      throw new Error('No API url present');
+    const apiUrl = this.configService.get<string>('urls.api')
+    if (apiUrl === undefined) {
+      throw new Error('No API url present')
     }
 
-    return apiUrl;
+    return apiUrl
   }
 
   getSwaggerUrls(): string[] {
-    const swaggerUrls = this.configService.get<string[]>('urls.swagger');
-    if (!swaggerUrls) {
-      throw new Error('No swagger urls present');
+    const swaggerUrls = this.configService.get<string[]>('urls.swagger')
+    if (swaggerUrls == null) {
+      throw new Error('No swagger urls present')
     }
 
-    return swaggerUrls;
+    return swaggerUrls
   }
 
   getRedisUrl(): string {
-    const redisUrl = this.configService.get<string>('urls.redis');
-    if (!redisUrl) {
-      throw new Error('No redisUrl present');
+    const redisUrl = this.configService.get<string>('urls.redis')
+    if (redisUrl === undefined) {
+      throw new Error('No redisUrl present')
     }
 
-    return redisUrl;
+    return redisUrl
   }
 
   getDatabaseHost(): string {
-    const databaseHost = this.configService.get<string>('database.host');
-    if (!databaseHost) {
-      throw new Error('No database.host present');
+    const databaseHost = this.configService.get<string>('database.host')
+    if (databaseHost === undefined) {
+      throw new Error('No database.host present')
     }
 
-    return databaseHost;
+    return databaseHost
   }
 
   getDatabasePort(): number {
-    const databasePort = this.configService.get<number>('database.port');
-    if (!databasePort) {
-      throw new Error('No database.port present');
+    const databasePort = this.configService.get<number>('database.port')
+    if (databasePort === undefined) {
+      throw new Error('No database.port present')
     }
 
-    return databasePort;
+    return databasePort
   }
 
-
   getDatabaseUsername(): string {
-    const databaseUsername = this.configService.get<string>('database.username');
-    if (!databaseUsername) {
-      throw new Error('No database.username present');
+    const databaseUsername = this.configService.get<string>('database.username')
+    if (databaseUsername === undefined) {
+      throw new Error('No database.username present')
     }
 
-    return databaseUsername;
+    return databaseUsername
   }
 
   getDatabasePassword(): string {
-    const databasePassword = this.configService.get<string>('database.password');
-    if (!databasePassword) {
-      throw new Error('No database.password present');
+    const databasePassword = this.configService.get<string>('database.password')
+    if (databasePassword === undefined) {
+      throw new Error('No database.password present')
     }
 
-    return databasePassword;
+    return databasePassword
   }
 
   getDatabaseName(): string {
-    const databaseName = this.configService.get<string>('database.name');
-    if (!databaseName) {
-      throw new Error('No database.name present');
+    const databaseName = this.configService.get<string>('database.name')
+    if (databaseName === undefined) {
+      throw new Error('No database.name present')
     }
 
-    return databaseName;
+    return databaseName
   }
 
   getDatabaseConnection(): { host: string, port: number, username: string, password: string, database: string } {
@@ -84,177 +83,176 @@ export class ApiConfigService {
       port: this.getDatabasePort(),
       username: this.getDatabaseUsername(),
       password: this.getDatabasePassword(),
-      database: this.getDatabaseName(),
-    };
+      database: this.getDatabaseName()
+    }
   }
 
-
   getNoSQLDatabaseConnection(): string {
-    return `mongodb://${this.getDatabaseHost()}:27017/${this.getDatabaseName()}`;
+    return `mongodb://${this.getDatabaseHost()}:27017/${this.getDatabaseName()}`
   }
 
   getIsPublicApiFeatureActive(): boolean {
-    const isApiActive = this.configService.get<boolean>('features.publicApi.enabled');
+    const isApiActive = this.configService.get<boolean>('features.publicApi.enabled')
     if (isApiActive === undefined) {
-      throw new Error('No public api feature flag present');
+      throw new Error('No public api feature flag present')
     }
 
-    return isApiActive;
+    return isApiActive
   }
 
   getPublicApiFeaturePort(): number {
-    const featurePort = this.configService.get<number>('features.publicApi.port');
+    const featurePort = this.configService.get<number>('features.publicApi.port')
     if (featurePort === undefined) {
-      throw new Error('No public api port present');
+      throw new Error('No public api port present')
     }
 
-    return featurePort;
+    return featurePort
   }
 
   getIsPrivateApiFeatureActive(): boolean {
-    const isApiActive = this.configService.get<boolean>('features.privateApi.enabled');
+    const isApiActive = this.configService.get<boolean>('features.privateApi.enabled')
     if (isApiActive === undefined) {
-      throw new Error('No private api feature flag present');
+      throw new Error('No private api feature flag present')
     }
 
-    return isApiActive;
+    return isApiActive
   }
 
   getPrivateApiFeaturePort(): number {
-    const featurePort = this.configService.get<number>('features.privateApi.port');
+    const featurePort = this.configService.get<number>('features.privateApi.port')
     if (featurePort === undefined) {
-      throw new Error('No private api port present');
+      throw new Error('No private api port present')
     }
 
-    return featurePort;
+    return featurePort
   }
 
   getIsCacheWarmerFeatureActive(): boolean {
-    const isCacheWarmerActive = this.configService.get<boolean>('features.cacheWarmer.enabled');
+    const isCacheWarmerActive = this.configService.get<boolean>('features.cacheWarmer.enabled')
     if (isCacheWarmerActive === undefined) {
-      throw new Error('No cache warmer feature flag present');
+      throw new Error('No cache warmer feature flag present')
     }
 
-    return isCacheWarmerActive;
+    return isCacheWarmerActive
   }
 
   getCacheWarmerFeaturePort(): number {
-    const featurePort = this.configService.get<number>('features.cacheWarmer.port');
+    const featurePort = this.configService.get<number>('features.cacheWarmer.port')
     if (featurePort === undefined) {
-      throw new Error('No cache warmer port present');
+      throw new Error('No cache warmer port present')
     }
 
-    return featurePort;
+    return featurePort
   }
 
   getIsTransactionProcessorFeatureActive(): boolean {
-    const isTransactionProcessorActive = this.configService.get<boolean>('features.transactionProcessor.enabled');
+    const isTransactionProcessorActive = this.configService.get<boolean>('features.transactionProcessor.enabled')
     if (isTransactionProcessorActive === undefined) {
-      throw new Error('No transaction processor feature flag present');
+      throw new Error('No transaction processor feature flag present')
     }
 
-    return isTransactionProcessorActive;
+    return isTransactionProcessorActive
   }
 
   getTransactionProcessorFeaturePort(): number {
-    const featurePort = this.configService.get<number>('features.transactionProcessor.port');
+    const featurePort = this.configService.get<number>('features.transactionProcessor.port')
     if (featurePort === undefined) {
-      throw new Error('No transaction processor port present');
+      throw new Error('No transaction processor port present')
     }
 
-    return featurePort;
+    return featurePort
   }
 
   getTransactionProcessorMaxLookBehind(): number {
-    const maxLookBehind = this.configService.get<number>('features.transactionProcessor.maxLookBehind');
+    const maxLookBehind = this.configService.get<number>('features.transactionProcessor.maxLookBehind')
     if (maxLookBehind === undefined) {
-      throw new Error('No transaction processor max look behind present');
+      throw new Error('No transaction processor max look behind present')
     }
 
-    return maxLookBehind;
+    return maxLookBehind
   }
 
   getIsQueueWorkerFeatureActive(): boolean {
-    const isQueueWorkerActive = this.configService.get<boolean>('features.queueWorker.enabled');
+    const isQueueWorkerActive = this.configService.get<boolean>('features.queueWorker.enabled')
     if (isQueueWorkerActive === undefined) {
-      throw new Error('No queue worker feature flag present');
+      throw new Error('No queue worker feature flag present')
     }
 
-    return isQueueWorkerActive;
+    return isQueueWorkerActive
   }
 
   getQueueWorkerFeaturePort(): number {
-    const featurePort = this.configService.get<number>('features.queueWorker.port');
+    const featurePort = this.configService.get<number>('features.queueWorker.port')
     if (featurePort === undefined) {
-      throw new Error('No transaction processor port present');
+      throw new Error('No transaction processor port present')
     }
 
-    return featurePort;
+    return featurePort
   }
 
   getSecurityAdmins(): string[] {
-    const admins = this.configService.get<string[]>('security.admins');
+    const admins = this.configService.get<string[]>('security.admins')
     if (admins === undefined) {
-      throw new Error('No security admins value present');
+      throw new Error('No security admins value present')
     }
 
-    return admins;
+    return admins
   }
 
   getRateLimiterSecret(): string | undefined {
-    return this.configService.get<string>('rateLimiterSecret');
+    return this.configService.get<string>('rateLimiterSecret')
   }
 
   getAxiosTimeout(): number {
-    return this.configService.get<number>('keepAliveTimeout.downstream') ?? 61000;
+    return this.configService.get<number>('keepAliveTimeout.downstream') ?? 61000
   }
 
   getIsKeepAliveAgentFeatureActive(): boolean {
-    return this.configService.get<boolean>('keepAliveAgent.enabled') ?? true;
+    return this.configService.get<boolean>('keepAliveAgent.enabled') ?? true
   }
 
   getServerTimeout(): number {
-    return this.configService.get<number>('keepAliveTimeout.upstream') ?? 60000;
+    return this.configService.get<number>('keepAliveTimeout.upstream') ?? 60000
   }
 
   getHeadersTimeout(): number {
-    return this.getServerTimeout() + 1000;
+    return this.getServerTimeout() + 1000
   }
 
   getUseCachingInterceptor(): boolean {
-    return this.configService.get<boolean>('useCachingInterceptor') ?? false;
+    return this.configService.get<boolean>('useCachingInterceptor') ?? false
   }
 
   getElasticUrl(): string {
-    const elasticUrls = this.configService.get<string[]>('urls.elastic');
-    if (!elasticUrls) {
-      throw new Error('No elastic urls present');
+    const elasticUrls = this.configService.get<string[]>('urls.elastic')
+    if (elasticUrls == null) {
+      throw new Error('No elastic urls present')
     }
 
-    return elasticUrls[Math.floor(Math.random() * elasticUrls.length)];
+    return elasticUrls[Math.floor(Math.random() * elasticUrls.length)]
   }
 
   getPoolLimit(): number {
-    return this.configService.get<number>('caching.poolLimit') ?? 100;
+    return this.configService.get<number>('caching.poolLimit') ?? 100
   }
 
   getProcessTtl(): number {
-    return this.configService.get<number>('caching.processTtl') ?? 60;
+    return this.configService.get<number>('caching.processTtl') ?? 60
   }
 
   getUseKeepAliveAgentFlag(): boolean {
-    return this.configService.get<boolean>('flags.useKeepAliveAgent') ?? true;
+    return this.configService.get<boolean>('flags.useKeepAliveAgent') ?? true
   }
 
   getIsAuthActive(): boolean {
-    return this.configService.get<boolean>('api.auth') ?? false;
+    return this.configService.get<boolean>('api.auth') ?? false
   }
 
   getNativeAuthMaxExpirySeconds(): number {
-    return this.configService.get<number>('nativeAuth.maxExpirySeconds') ?? 86400;
+    return this.configService.get<number>('nativeAuth.maxExpirySeconds') ?? 86400
   }
 
   getNativeAuthAcceptedOrigins(): string[] {
-    return this.configService.get<string[]>('nativeAuth.acceptedOrigins') ?? [];
+    return this.configService.get<string[]>('nativeAuth.acceptedOrigins') ?? []
   }
 }

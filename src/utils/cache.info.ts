@@ -1,6 +1,6 @@
-import { Constants } from "@multiversx/sdk-nestjs";
+import { Constants } from '@multiversx/sdk-nestjs'
 
 export class CacheInfo {
-  key: string = "";
-  ttl: number = Constants.oneSecond() * 6;
+  key: string = ''
+  ttl: number = Constants.oneSecond() * 6
 }

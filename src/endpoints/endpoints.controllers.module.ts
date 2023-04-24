@@ -1,17 +1,17 @@
-import { Module } from "@nestjs/common";
-import { DynamicModuleUtils } from "src/utils/dynamic.module.utils";
-import { EndpointsServicesModule } from "./endpoints.services.module";
-import {PixelsController} from "./pixels/pixels.controller";
+import { Module } from '@nestjs/common'
+import { DynamicModuleUtils } from 'src/utils/dynamic.module.utils'
+import { EndpointsServicesModule } from './endpoints.services.module'
+import { PixelsController } from './pixels/pixels.controller'
 
 @Module({
   imports: [
-    EndpointsServicesModule,
+    EndpointsServicesModule
   ],
   providers: [
-    DynamicModuleUtils.getNestJsApiConfigService(),
+    DynamicModuleUtils.getNestJsApiConfigService()
   ],
   controllers: [
-    PixelsController,
-  ],
+    PixelsController
+  ]
 })
 export class EndpointsControllersModule { }
