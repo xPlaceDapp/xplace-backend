@@ -1,5 +1,7 @@
 urls:
-  api: 'https://devnet-api.multiversx.com'
+  api: 'localhost:3010'
+  elastic:
+    - 'https://devnet-index.multiversx.com'
   swagger:
     - 'http://localhost:3000'
   redis: '127.0.0.1'

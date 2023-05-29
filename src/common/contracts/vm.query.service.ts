@@ -13,14 +13,17 @@ import xplaceAbi from '../../abi/xplace.abi'
 
 @Injectable()
 export class VmQueryService {
+  static getContractAbi(): AbiRegistry {
+    const abiJson = xplaceAbi
+    return AbiRegistry.create(abiJson)
+  }
+
   async query(
     contractAddress: string,
     functionName: string,
     args: Array<string | object>
   ): Promise<TypedOutcomeBundle> {
-    const abiJson = xplaceAbi
-    const abiRegistry = AbiRegistry.create(abiJson)
-    const abi = new SmartContractAbi(abiRegistry, [''])
+    const abi = new SmartContractAbi(VmQueryService.getContractAbi(), [''])
 
     const contract = new SmartContract({
       address: new Address(contractAddress),
@@ -32,7 +35,7 @@ export class VmQueryService {
     )
 
     const query = queryInteraction.buildQuery()
-    const provider = new ProxyNetworkProvider('https://devnet-gateway.multiversx.com')
+    const provider = new ProxyNetworkProvider('http://localhost:3010')
 
     try {
       await provider.queryContract(query)
