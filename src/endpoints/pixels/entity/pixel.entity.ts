@@ -1,26 +1,31 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
-import { ApiProperty } from '@nestjs/swagger'
+
+export enum PixelColor {
+  Red = 'Red',
+  Blue = 'Blue',
+  Yellow = 'Yellow',
+  Purple = 'Purple',
+  White = 'White',
+  Black = 'Black',
+}
 
 @Entity()
 export class PixelEntity {
-  @ApiProperty({
-    type: Number,
-    example: 1
-  })
   @PrimaryGeneratedColumn()
     id!: number
 
-  @ApiProperty({
-    type: Number,
-    example: 145
-  })
   @Column()
     x!: number
 
-  @ApiProperty({
-    type: Number,
-    example: 145
-  })
   @Column()
     y!: number
+
+  @Column()
+    address!: string
+
+  @Column()
+    playedCount!: number
+
+  @Column()
+    color!: PixelColor
 }

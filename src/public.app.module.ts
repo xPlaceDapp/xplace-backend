@@ -7,13 +7,15 @@ import { EndpointsServicesModule } from './endpoints/endpoints.services.module'
 import { EndpointsControllersModule } from './endpoints/endpoints.controllers.module'
 import { DynamicModuleUtils } from './utils/dynamic.module.utils'
 import { CachingModule, LoggingModule } from '@multiversx/sdk-nestjs'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
     LoggingModule,
     DynamicModuleUtils.getCachingModule(),
     EndpointsServicesModule,
-    EndpointsControllersModule
+    EndpointsControllersModule,
+    ScheduleModule.forRoot()
   ],
   providers: [
     DynamicModuleUtils.getNestJsApiConfigService()

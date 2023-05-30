@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { PixelsBo } from './bo/pixels.bo'
 import { VmQueryService } from '../../common/contracts/vm.query.service'
 import {
+  type Address,
   type AddressValue,
   BinaryCodec, type EnumValue,
   type Struct, type StructType,
@@ -12,16 +13,17 @@ import {
 } from '@multiversx/sdk-core/out'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { PixelEntity } from './entity/pixel.entity'
+import { PixelColor, PixelEntity } from './entity/pixel.entity'
 import { CachingService, Constants } from '@multiversx/sdk-nestjs'
 import { ElasticService } from '../../common/elastic/elastic.service'
 import { type ElasticTransactionsResult } from '../../common/elastic/types/elastic.transactions.result'
 import type BigNumber from 'bignumber.js'
+import { Interval } from '@nestjs/schedule'
 
 interface GetPixelInfos {
   x: number
   y: number
-  infos: {}
+  infos: PixelInfos
 }
 
 interface PixelInfos {
@@ -30,7 +32,7 @@ interface PixelInfos {
   playedCount: number
 }
 
-export const CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqrl30e8leuhsr5ev5q7gdr6h5s0xs8rrxvl0sjmch0u' // TODO : remove
+export const CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqvmxyg9sf5w5zmvg0d0ehmqsfpgw259pvvl0sdp2al6' // TODO : remove
 
 @Injectable()
 export class PixelsService {
@@ -46,17 +48,12 @@ export class PixelsService {
   async getAllPixels(): Promise<PixelsBo[]> {
     const lastPixelUpdate = await this.getLastPixelUpdate()
 
-    if (lastPixelUpdate === null) {
+    if (lastPixelUpdate === undefined) {
       return await this.refreshAllPixels()
     } else {
-      await this.refreshLatestPixels()
-
       const pixelsEntities = await this.pixelsRepository.find()
 
-      return pixelsEntities.map(e => new PixelsBo(
-        e.x,
-        e.y
-      ))
+      return pixelsEntities.map(e => PixelsBo.fromEntity(e))
     }
   }
 
@@ -82,20 +79,35 @@ export class PixelsService {
 
       pixelEntity.x = pixelInfos.x
       pixelEntity.y = pixelInfos.y
+      pixelEntity.address = pixelInfos.infos.address
+      pixelEntity.color = PixelColor[pixelInfos.infos.color as keyof typeof PixelColor]
+      pixelEntity.playedCount = pixelInfos.infos.playedCount
 
       await this.pixelsRepository.insert(pixelEntity)
     }
 
     await this.setLastPixelUpdate(now)
 
-    return allPixelsInfos.map(e => new PixelsBo(
-      e.x,
-      e.y
-    ))
+    return allPixelsInfos.map(e => {
+      return new PixelsBo(
+        e.x,
+        e.y,
+        e.infos.address,
+        PixelColor[e.infos.color as keyof typeof PixelColor],
+        e.infos.playedCount
+      )
+    })
   }
 
-  private async refreshLatestPixels(): Promise<void> {
-    const now = new Date()
+  @Interval(6000)
+  async refreshLatestPixels(): Promise<void> {
+    const latestPixelUpdate = await this.getLastPixelUpdate()
+
+    if (latestPixelUpdate === undefined) {
+      return
+    }
+
+    const latestPixelUpdateTimestamp = Math.floor((latestPixelUpdate.getTime()) / 1000)
 
     const pixelsToRefresh: GetPixelInfos[] = []
     const transactionsRequestBody = {
@@ -107,6 +119,14 @@ export class PixelsService {
       query: {
         bool: {
           filter: [
+            {
+              range: {
+                timestamp: {
+                  gt: latestPixelUpdateTimestamp,
+                  lte: 'now'
+                }
+              }
+            },
             {
               match: {
                 receiver: CONTRACT_ADDRESS
@@ -123,6 +143,13 @@ export class PixelsService {
     }
 
     const transactions: ElasticTransactionsResult = await this.elasticService.queryTransactions(transactionsRequestBody)
+
+    if (transactions.hits.hits.length === 0) {
+      console.log('No pixel to update')
+      return
+    }
+
+    const latestTransactionTimestamp = Math.max(...transactions.hits.hits.map(e => e._source.timestamp))
 
     for (const transaction of transactions.hits.hits) {
       const logsBody = {
@@ -175,19 +202,27 @@ export class PixelsService {
       })
     }
 
+    console.log(`Fetched ${pixelsToRefresh.length} pixels`)
+    console.log(pixelsToRefresh)
+
     await this.changePixelsInDatabase(pixelsToRefresh)
 
-    await this.setLastPixelUpdate(now)
+    await this.setLastPixelUpdate(new Date(latestTransactionTimestamp * 1000))
   }
 
   private parsePixel(pixelStruct: Struct): GetPixelInfos {
-    const x = (pixelStruct.getFieldValue('x') as U64Value).valueOf() as unknown as number
-    const y = (pixelStruct.getFieldValue('y') as U64Value).valueOf() as unknown as number
+    const x = (pixelStruct.getFieldValue('x') as U64Value).valueOf() as unknown as string
+    const y = (pixelStruct.getFieldValue('y') as U64Value).valueOf() as unknown as string
+    const infos = pixelStruct.getFieldValue('pixel_infos') as { address: Address, color: { name: string }, played_count: BigNumber }
 
     return {
-      x,
-      y,
-      infos: {}
+      x: Number(x),
+      y: Number(y),
+      infos: {
+        address: infos.address.bech32(),
+        color: infos.color.name,
+        playedCount: infos.played_count.toNumber()
+      }
     }
   }
 
@@ -232,10 +267,11 @@ export class PixelsService {
   private async getLastPixelUpdate(): Promise<Date | undefined> {
     const dateString = await this.cachingService.getCache<string>('last-pixel-update')
 
-    if (dateString === undefined) {
+    if (dateString === null) {
       return undefined
     }
 
+    // @ts-expect-error error in the multiversx sdk
     return new Date(dateString)
   }
 
@@ -243,7 +279,7 @@ export class PixelsService {
     await this.cachingService.setCache(
       'last-pixel-update',
       date.toISOString(),
-      Constants.oneSecond() * 6
+      Constants.oneMonth() * 24
     )
   }
 
@@ -262,6 +298,9 @@ export class PixelsService {
 
       pixelEntity.x = pixel.x
       pixelEntity.y = pixel.y
+      pixelEntity.address = pixel.infos.address
+      pixelEntity.color = PixelColor[pixel.infos.color as keyof typeof PixelColor]
+      pixelEntity.playedCount = pixel.infos.playedCount
 
       await this.pixelsRepository.save(pixelEntity)
     }
