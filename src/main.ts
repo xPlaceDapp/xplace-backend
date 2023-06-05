@@ -62,7 +62,7 @@ async function bootstrap(): Promise<void> {
   const config = documentBuilder.build()
 
   const document = SwaggerModule.createDocument(publicApp, config)
-  SwaggerModule.setup('', publicApp, document)
+  SwaggerModule.setup('docs', publicApp, document)
 
   if (apiConfigService.getIsPublicApiFeatureActive()) {
     await publicApp.listen(apiConfigService.getPublicApiFeaturePort())

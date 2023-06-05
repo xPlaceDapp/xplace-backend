@@ -9,6 +9,25 @@ export enum PixelColor {
   Black = 'Black',
 }
 
+export function getHexColorFromPixelColorEnum(pixel: PixelColor): string {
+  switch (pixel) {
+    case PixelColor.Red:
+      return '#ff0000'
+    case PixelColor.Blue:
+      return '#0000ff'
+    case PixelColor.Yellow:
+      return '#ffff00'
+    case PixelColor.Purple:
+      return '#ff00ff'
+    case PixelColor.White:
+      return '#ffffff'
+    case PixelColor.Black:
+      return '#000000'
+    default:
+      return '#ffffff'
+  }
+}
+
 @Entity()
 export class PixelEntity {
   @PrimaryGeneratedColumn()

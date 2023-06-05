@@ -1,5 +1,5 @@
 urls:
-  api: 'localhost:3010'
+  api: 'https://devnet-api.multiversx.com'
   elastic:
     - 'https://devnet-index.multiversx.com'
   swagger:

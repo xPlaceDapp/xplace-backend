@@ -84,6 +84,21 @@ export default {
       ]
     },
     {
+      name: 'getPixelPrice',
+      mutability: 'readonly',
+      inputs: [
+        {
+          name: 'played_count',
+          type: 'u64'
+        }
+      ],
+      outputs: [
+        {
+          type: 'BigUint'
+        }
+      ]
+    },
+    {
       name: 'getGridSize',
       mutability: 'readonly',
       inputs: [],

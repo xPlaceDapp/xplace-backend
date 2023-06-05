@@ -10,9 +10,15 @@ import {
 import { ErrorsConstants } from '../../utils/errors.constants'
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out'
 import xplaceAbi from '../../abi/xplace.abi'
+import {ApiConfigService} from "../api-config/api.config.service"
 
 @Injectable()
 export class VmQueryService {
+
+  constructor(
+      private readonly apiConfigService: ApiConfigService
+  ) {}
+
   static getContractAbi(): AbiRegistry {
     const abiJson = xplaceAbi
     return AbiRegistry.create(abiJson)
@@ -35,7 +41,7 @@ export class VmQueryService {
     )
 
     const query = queryInteraction.buildQuery()
-    const provider = new ProxyNetworkProvider('http://localhost:3010')
+    const provider = new ProxyNetworkProvider(this.apiConfigService.getApiUrl())
 
     try {
       await provider.queryContract(query)

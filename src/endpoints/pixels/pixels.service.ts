@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { PixelsBo } from './bo/pixels.bo'
 import { VmQueryService } from '../../common/contracts/vm.query.service'
 import {
@@ -19,6 +19,7 @@ import { ElasticService } from '../../common/elastic/elastic.service'
 import { type ElasticTransactionsResult } from '../../common/elastic/types/elastic.transactions.result'
 import type BigNumber from 'bignumber.js'
 import { Interval } from '@nestjs/schedule'
+import { PixelInfosBo } from './bo/pixel.infos.bo'
 
 interface GetPixelInfos {
   x: number
@@ -32,7 +33,7 @@ interface PixelInfos {
   playedCount: number
 }
 
-export const CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqvmxyg9sf5w5zmvg0d0ehmqsfpgw259pvvl0sdp2al6' // TODO : remove
+export const CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgq590zplleun0rdtts7kh5pk4cpjmuyaxdvl0s5jzxjl' // TODO : remove
 
 @Injectable()
 export class PixelsService {
@@ -55,6 +56,31 @@ export class PixelsService {
 
       return pixelsEntities.map(e => PixelsBo.fromEntity(e))
     }
+  }
+
+  async getPixelInfos(x: number, y: number): Promise<PixelInfosBo> {
+    if (!(await this.validateCoordinates(x, y))) {
+      throw new HttpException('Invalid coordinates : out of bounds', HttpStatus.BAD_REQUEST)
+    }
+
+    const pixelEntity = await this.pixelsRepository.findOne({
+      where: {
+        x,
+        y
+      }
+    })
+
+    let priceToChange = '0'
+
+    if (pixelEntity !== null) {
+      priceToChange = await this.getPixelPriceToChange(pixelEntity.playedCount)
+    }
+
+    return new PixelInfosBo(
+      x,
+      y,
+      priceToChange
+    )
   }
 
   private async refreshAllPixels(): Promise<PixelsBo[]> {
@@ -264,6 +290,24 @@ export class PixelsService {
     return items.map(e => this.parsePixel(e as Struct))
   }
 
+  private async getPixelPriceToChange(playedCount: number): Promise<string> {
+    return await this.cachingService.getOrSetCache(
+      `pixel-price-${playedCount}`,
+      async () => await this.getPixelPriceToChangeRaw(playedCount),
+      Constants.oneMinute() * 10
+    )
+  }
+
+  private async getPixelPriceToChangeRaw(playedCount: number): Promise<string> {
+    return (await this.vmQueryService.queryAndGetU64(
+      CONTRACT_ADDRESS,
+      'getPixelPrice',
+      [
+        playedCount.toString()
+      ]
+    ))
+  }
+
   private async getLastPixelUpdate(): Promise<Date | undefined> {
     const dateString = await this.cachingService.getCache<string>('last-pixel-update')
 
@@ -321,5 +365,11 @@ export class PixelsService {
   private getPixelsInfosType(): StructType {
     const abi = VmQueryService.getContractAbi()
     return abi.getStruct('PixelInfos')
+  }
+
+  private async validateCoordinates(x: number, y: number): Promise<boolean> {
+    const gridSize = await this.getGridSize()
+
+    return x >= 0 && x < gridSize && y >= 0 && y < gridSize
   }
 }

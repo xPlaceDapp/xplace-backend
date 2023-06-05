@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { PixelColor, type PixelEntity } from '../entity/pixel.entity'
+import {getHexColorFromPixelColorEnum, type PixelColor, type PixelEntity} from '../entity/pixel.entity'
 
 export class PixelsBo {
   @ApiProperty({
@@ -19,16 +19,15 @@ export class PixelsBo {
   @ApiProperty({
     description: 'Address of the player that played the pixel',
     type: String,
-    example: 15
+    example: 'erd...'
   })
     address: string
 
   @ApiProperty({
-    description: "Pixel's color",
-    enum: PixelColor,
-    example: PixelColor.Red
+    description: "Pixel's color, hex formatted",
+    example: '#ffffff'
   })
-    color: PixelColor
+    color: string
 
   @ApiProperty({
     description: 'How many times the pixel has been played',
@@ -57,7 +56,7 @@ export class PixelsBo {
     this.x = x
     this.y = y
     this.address = address
-    this.color = color
+    this.color = getHexColorFromPixelColorEnum(color)
     this.playedCount = playedCount
   }
 }
