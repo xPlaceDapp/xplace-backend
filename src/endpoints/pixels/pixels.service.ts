@@ -18,7 +18,6 @@ import { CachingService, Constants } from '@multiversx/sdk-nestjs'
 import { ElasticService } from '../../common/elastic/elastic.service'
 import { type ElasticTransactionsResult } from '../../common/elastic/types/elastic.transactions.result'
 import type BigNumber from 'bignumber.js'
-import { Interval } from '@nestjs/schedule'
 import { PixelInfosBo } from './bo/pixel.infos.bo'
 
 interface GetPixelInfos {
@@ -52,6 +51,7 @@ export class PixelsService {
     if (lastPixelUpdate === undefined) {
       return await this.refreshAllPixels()
     } else {
+      await this.refreshLatestPixels()
       const pixelsEntities = await this.pixelsRepository.find()
 
       return pixelsEntities.map(e => PixelsBo.fromEntity(e))
@@ -125,7 +125,6 @@ export class PixelsService {
     })
   }
 
-  @Interval(6000)
   async refreshLatestPixels(): Promise<void> {
     const latestPixelUpdate = await this.getLastPixelUpdate()
 

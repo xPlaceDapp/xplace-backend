@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import {getHexColorFromPixelColorEnum, type PixelColor, type PixelEntity} from '../entity/pixel.entity'
+import { getHexColorFromPixelColorEnum, type PixelColor, type PixelEntity } from '../entity/pixel.entity'
 
 export class PixelsBo {
   @ApiProperty({
