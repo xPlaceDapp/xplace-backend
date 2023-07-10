@@ -13,12 +13,19 @@ import {
 } from '@multiversx/sdk-core/out'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { PixelColor, PixelEntity } from './entity/pixel.entity'
+import {
+  getDiscriminantFromPixelColorEnum,
+  getHexColorFromPixelColorEnum,
+  PixelColor,
+  PixelEntity
+} from './entity/pixel.entity'
 import { CachingService, Constants } from '@multiversx/sdk-nestjs'
 import { ElasticService } from '../../common/elastic/elastic.service'
 import { type ElasticTransactionsResult } from '../../common/elastic/types/elastic.transactions.result'
 import type BigNumber from 'bignumber.js'
 import { PixelInfosBo } from './bo/pixel.infos.bo'
+import { PixelConfigBo } from './bo/pixel.config.bo'
+import { PixelAvailableColorsBo } from './bo/pixel.available.colors.bo'
 
 interface GetPixelInfos {
   x: number
@@ -43,6 +50,17 @@ export class PixelsService {
     private readonly pixelsRepository: Repository<PixelEntity>,
     private readonly elasticService: ElasticService
   ) {
+  }
+
+  async getConfig(): Promise<PixelConfigBo> {
+    const availableColors = Object.values(PixelColor).map((item) => {
+      return new PixelAvailableColorsBo(
+        getHexColorFromPixelColorEnum(item),
+        getDiscriminantFromPixelColorEnum(item)
+      )
+    })
+
+    return new PixelConfigBo(availableColors)
   }
 
   async getAllPixels(): Promise<PixelsBo[]> {

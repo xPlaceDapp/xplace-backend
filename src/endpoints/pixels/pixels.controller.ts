@@ -3,6 +3,7 @@ import { PixelsBo } from './bo/pixels.bo'
 import { ApiResponse } from '@nestjs/swagger'
 import { PixelsService } from './pixels.service'
 import { PixelInfosBo } from './bo/pixel.infos.bo'
+import { PixelConfigBo } from './bo/pixel.config.bo'
 
 @Controller('pixels')
 export class PixelsController {
@@ -19,6 +20,16 @@ export class PixelsController {
   })
   async getAllPixels(): Promise<PixelsBo[]> {
     return await this.pixelsService.getAllPixels()
+  }
+
+  @Get('/config')
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the config',
+    type: PixelConfigBo
+  })
+  async getConfig(): Promise<PixelConfigBo> {
+    return await this.pixelsService.getConfig()
   }
 
   @Get(':x/:y/infos')

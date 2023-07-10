@@ -1,4 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
+import { EnumValue } from '@multiversx/sdk-core/out'
+import { VmQueryService } from '../../../common/contracts/vm.query.service'
 
 export enum PixelColor {
   Red = 'Red',
@@ -26,6 +28,14 @@ export function getHexColorFromPixelColorEnum(pixel: PixelColor): string {
     default:
       return '#ffffff'
   }
+}
+
+export function getDiscriminantFromPixelColorEnum(pixel: PixelColor): number {
+  const abi = VmQueryService.getContractAbi()
+  const PixelColorEnum = abi.getEnum('PixelColor')
+  const enumValue = EnumValue.fromName(PixelColorEnum, pixel)
+
+  return enumValue.discriminant
 }
 
 @Entity()
